@@ -7,6 +7,12 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Build Backend') {
             steps {
                 dir('backend') {
@@ -28,11 +34,3 @@ pipeline {
                 }
             }
         }
-
-        stage('Success') {
-            steps {
-                echo '✅ Backend i frontend zostały zbudowane pomyślnie!'
-            }
-        }
-    }
-}

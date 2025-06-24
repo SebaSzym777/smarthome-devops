@@ -4,14 +4,13 @@ USER root
 
 RUN apt-get update && apt-get install -y docker.io && rm -rf /var/lib/apt/lists/*
 
-ARG DOCKER_GID=1000
+# Zmień GID grupy jenkins z 1000 na 2000 (lub inny wolny numer)
+RUN groupmod -g 2000 jenkins
 
-# Jeśli istnieje grupa z GID=1000, to dodaj jenkinsa do niej, w przeciwnym razie zmień GID grupy docker
-RUN existing_group=$(getent group ${DOCKER_GID} | cut -d: -f1) && \
-    if [ -n "$existing_group" ]; then \
-        usermod -aG $existing_group jenkins; \
-    else \
-        groupmod -g ${DOCKER_GID} docker && usermod -aG docker jenkins; \
-    fi
+# Zmień GID grupy docker na 1000 (pasujący do hosta)
+RUN groupmod -g 1000 docker
+
+# Dodaj użytkownika jenkins do grupy docker
+RUN usermod -aG docker jenkins
 
 USER jenkins
