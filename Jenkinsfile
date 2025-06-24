@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        BACKEND_IMAGE = "smarthome-backend"
-        FRONTEND_IMAGE = "smarthome-frontend"
+        BACKEND_IMAGE = 'smarthome-backend:latest'
+        FRONTEND_IMAGE = 'smarthome-frontend:latest'
     }
 
     stages {
@@ -16,10 +16,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
-                    script {
-                        echo "📦 Budowanie backendu..."
-                        sh 'docker build -t $BACKEND_IMAGE .'
-                    }
+                    sh 'docker build -t $BACKEND_IMAGE .'
                 }
             }
         }
@@ -27,10 +24,15 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    script {
-                        echo "🎨 Budowanie frontendu..."
-                        sh 'docker build -t $FRONTEND_IMAGE .'
-                    }
+                    sh 'docker build -t $FRONTEND_IMAGE .'
                 }
             }
         }
+
+        stage('Success') {
+            steps {
+                echo 'Build zakończony pomyślnie!'
+            }
+        }
+    }
+}
