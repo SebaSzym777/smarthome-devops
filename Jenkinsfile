@@ -29,9 +29,16 @@ pipeline {
             }
         }
 
+        stage('Restart Stack (backend + frontend + db)') {
+            steps {
+                sh 'docker compose down || true'
+                sh 'docker compose up -d'
+            }
+        }
+
         stage('Success') {
             steps {
-                echo 'Build zakończony pomyślnie!'
+                echo 'Cały system uruchomiony poprawnie (backend + frontend + baza danych)!'
             }
         }
     }
