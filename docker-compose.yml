@@ -40,7 +40,7 @@ services:
       - smarthome-net
 
   jenkins:
-    image: jenkins/jenkins:lts
+    image: my-jenkins-with-docker
     container_name: jenkins
     user: root
     ports:
@@ -49,7 +49,6 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/bin/docker:/usr/bin/docker
     environment:
     - JAVA_OPTS=-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true
     networks:

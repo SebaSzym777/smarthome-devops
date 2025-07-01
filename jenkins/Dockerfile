@@ -2,14 +2,18 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-# Sprawdźmy, czy grupa o GID 1000 już istnieje, jeśli tak to ją wykorzystaj, jeśli nie to utwórz
-RUN if ! getent group 1000; then \
-      groupadd -g 1000 docker; \
-    else \
-      echo "Grupa o GID 1000 już istnieje"; \
-    fi
+# Zainstaluj zależności i docker CLI
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
 
-# Dodajemy użytkownika jenkins do grupy o GID 1000 (nazwa może być inna, więc pobierzemy ją dynamicznie)
-RUN usermod -aG $(getent group 1000 | cut -d: -f1) jenkins
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+
+RUN apt-get update && apt-get install -y docker-ce-cli
 
 USER jenkins
