@@ -31,8 +31,8 @@ pipeline {
 
         stage('Restart Stack (backend + frontend + db)') {
             steps {
-                sh 'docker compose down || true'
-                sh 'docker compose up -d'
+                 sh 'docker compose restart backend frontend db'
+
             }
         }
 
