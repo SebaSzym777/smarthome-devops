@@ -54,6 +54,18 @@ services:
       - smarthome-net
     restart: unless-stopped
 
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - jenkins
+    networks:
+      - smarthome-net
+
 networks:
   smarthome-net:
     driver: bridge
