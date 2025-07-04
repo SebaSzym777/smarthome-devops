@@ -11,6 +11,12 @@ pipeline {
             steps {
                 checkout scm
             }
+        }   
+
+        stage('Clean Up') {
+            steps {
+                sh 'docker compose down'
+            }
         }
 
         stage('Build Backend') {
@@ -31,14 +37,14 @@ pipeline {
 
         stage('Restart Stack (backend + frontend + db)') {
             steps {
-                 sh 'docker compose restart backend frontend db'
-
+                // Wymusza restart z nowo zbudowanych obrazów
+                sh 'docker compose up -d --build backend frontend db'
             }
         }
 
         stage('Success') {
             steps {
-                echo 'Cały system uruchomiony poprawnie (backend + frontend + baza danych)!'
+                echo '✅ Cały system uruchomiony poprawnie (backend + frontend + baza danych)!'
             }
         }
     }
