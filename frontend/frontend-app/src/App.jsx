@@ -52,7 +52,7 @@ function App() {
 
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial" }}>
-      <h2>Panel logowania</h2>
+      <h2>Panel logowania test1</h2>
 
       <input
         type="text"
