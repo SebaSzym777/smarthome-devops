@@ -67,9 +67,9 @@ pipeline {
 
         stage('Start containers') {
             steps {
-                sh 'docker compose up -d'
+                sh 'docker compose up -d backend frontend db nginx'
             }
-        }
+    }
 
         stage('Success') {
             steps {
