@@ -11,13 +11,48 @@ pipeline {
             steps {
                 checkout scm
             }
-        }   
-        
+        }
+
+        stage('Stop all containers (except Jenkins)') {
+            steps {
+                script {
+                    // Zatrzymaj wszystkie kontenery oprócz Jenkinsa
+                    sh '''
+                    echo "Stopping all containers (except Jenkins)..."
+                    for container in $(docker ps -q); do
+                        name=$(docker inspect --format='{{.Name}}' $container | sed 's/\\///g')
+                        if [[ "$name" != *"jenkins"* ]]; then
+                            echo "Stopping container: $name"
+                            docker stop $container || true
+                        fi
+                    done
+                    '''
+                }
+            }
+        }
+
+        stage('Remove old containers (except Jenkins)') {
+            steps {
+                script {
+                    // Usuń wszystkie zatrzymane kontenery oprócz Jenkinsa
+                    sh '''
+                    echo "Removing all stopped containers (except Jenkins)..."
+                    for container in $(docker ps -aq); do
+                        name=$(docker inspect --format='{{.Name}}' $container | sed 's/\\///g')
+                        if [[ "$name" != *"jenkins"* ]]; then
+                            echo "Removing container: $name"
+                            docker rm $container || true
+                        fi
+                    done
+                    '''
+                }
+            }
+        }
 
         stage('Build Backend') {
             steps {
                 dir('backend') {
-                    sh 'docker build -t $BACKEND_IMAGE .'
+                    sh 'docker build --no-cache -t $BACKEND_IMAGE .'
                 }
             }
         }
@@ -25,21 +60,20 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t $FRONTEND_IMAGE .'
+                    sh 'docker build --no-cache -t $FRONTEND_IMAGE .'
                 }
             }
         }
 
-        stage('Restart Stack (backend + frontend + db)') {
+        stage('Start containers') {
             steps {
-                // Wymusza restart z nowo zbudowanych obrazów
-                sh 'docker compose up -d --build backend frontend db'
+                sh 'docker compose up -d'
             }
         }
 
         stage('Success') {
             steps {
-                echo '✅ Cały system uruchomiony poprawnie (backend + frontend + baza danych)!'
+                echo '✅ System uruchomiony: backend + frontend + baza danych!'
             }
         }
     }
