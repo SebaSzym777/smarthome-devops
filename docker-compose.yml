@@ -1,3 +1,4 @@
+version: '3.9'
 
 services:
   backend:
@@ -5,37 +6,31 @@ services:
     container_name: backend
     ports:
       - "8000:8000"
+    depends_on:
+      - db
     networks:
       - smarthome-net
-    environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=smarthome
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "5173:80"
+    networks:
+      - smarthome-net
 
   db:
     image: postgres:15
+    container_name: db
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: smarthome
-    ports:
-      - "5432:5432"  
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - smarthome-net
-
-  frontend:
-    build:
-      context: ./frontend
-    container_name: frontend
     ports:
-      - "5173:80"
-    depends_on:
-      - backend
+      - "5433:5432"  # Używamy 5433 na hoście, by uniknąć konfliktu
     networks:
       - smarthome-net
 
@@ -46,14 +41,13 @@ services:
     ports:
       - "8080:8080"
       - "50000:50000"
-    volumes:
-      - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - JAVA_OPTS=-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true -Djenkins.model.Jenkins.contextPath=/jenkins
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jenkins_home:/var/jenkins_home
     networks:
       - smarthome-net
-    restart: unless-stopped
 
   nginx:
     image: nginx:latest
@@ -62,13 +56,16 @@ services:
       - "8081:80"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - jenkins
+      - frontend
     networks:
       - smarthome-net
-
-networks:
-  smarthome-net:
-    driver: bridge
 
 volumes:
   postgres_data:
   jenkins_home:
+
+networks:
+  smarthome-net:
+    driver: bridge
