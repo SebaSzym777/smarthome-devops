@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  jenkins:
+    image: my-jenkins-with-docker
+    container_name: jenkins
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      JENKINS_OPTS: --prefix=/jenkins
+      JAVA_OPTS: >-
+        -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jenkins_home:/var/jenkins_home
+    networks:
+      - smarthome-net
+
+volumes:
+  jenkins_home:
+
+networks:
+  smarthome-net:
+    external: true  # będzie utworzona przez drugi compose
