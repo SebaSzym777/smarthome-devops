@@ -61,7 +61,7 @@ services:
     ports:
       - "8081:80"
     volumes:
-      - ./nginx:/etc/nginx/conf.d
+      - ./nginx/conf.d:/etc/nginx/conf.d
     networks:
       - smarthome-net
 
