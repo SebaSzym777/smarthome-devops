@@ -30,24 +30,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"  # Używamy 5433 na hoście, by uniknąć konfliktu
-    networks:
-      - smarthome-net
-
-  jenkins:
-    image: my-jenkins-with-docker
-    container_name: jenkins
-    user: root
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    environment:
-      JENKINS_OPTS: --prefix=/jenkins
-      JAVA_OPTS: >-
-        -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - jenkins_home:/var/jenkins_home
+      - "5433:5432"
     networks:
       - smarthome-net
 
@@ -59,15 +42,14 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
-      - jenkins
       - frontend
     networks:
       - smarthome-net
 
 volumes:
   postgres_data:
-  jenkins_home:
 
 networks:
   smarthome-net:
+    name: smarthome-net
     driver: bridge
