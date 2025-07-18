@@ -27,7 +27,7 @@ pipeline {
       steps {
         dir("${PROJECT_DIR}/frontend") {
           echo '🎨 Buduję frontend...'
-          sh 'docker build -t ${FRONTEND_IMAGE} .'
+          sh 'docker build --no-cache -t ${FRONTEND_IMAGE} .'
         }
       }
     }
@@ -36,7 +36,8 @@ pipeline {
       steps {
         dir("${PROJECT_DIR}") {
           echo '🚀 Uruchamiam backend + frontend + db + nginx...'
-          sh 'docker compose up -d'
+          sh 'docker compose down --remove-orphans'
+          sh 'docker compose up -d --build'
         }
       }
     }
