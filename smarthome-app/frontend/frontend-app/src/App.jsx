@@ -93,7 +93,7 @@ function App() {
 
       {mode === "login" ? (
         <>
-          <button onClick={login}>Zaloguj</button>
+          <button onClick={login}>Zaloguj mnie</button>
           <p>
             Nie masz konta?{" "}
             <button onClick={() => setMode("register")}>Zarejestruj się</button>
