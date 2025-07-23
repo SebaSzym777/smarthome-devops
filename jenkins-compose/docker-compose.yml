@@ -1,7 +1,9 @@
 
 services:
   jenkins:
-    image: my-jenkins-with-docker
+    build:
+      context: .
+      dockerfile: jenkins-k8s.Dockerfile
     container_name: jenkins
     user: root
     ports:
@@ -12,7 +14,7 @@ services:
       JAVA_OPTS: >-
         -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock 
       - jenkins_home:/var/jenkins_home
     networks:
       - smarthome-net
