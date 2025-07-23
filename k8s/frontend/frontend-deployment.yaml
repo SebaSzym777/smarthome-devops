@@ -1,0 +1,21 @@
+apiVersion: apps/v1                        # Używamy API wersji dla zasobów Deployment
+kind: Deployment                           # Typ zasobu - Deployment zarządza uruchamianiem kontenerów
+metadata:
+  name: frontend                           # Nazwa Deploymentu (unikatowa w namespace)
+  namespace: smarthome                     # Namespace, w którym będzie działać (musisz mieć go wcześniej utworzony)
+spec:
+  replicas: 1                              # Liczba replik (czyli ile kopii aplikacji ma działać)
+  selector:
+    matchLabels:
+      app: frontend                        # Szuka Podów z etykietą "app=frontend", żeby wiedzieć, które kontrolować
+  template:                                # Szablon dla tworzenia nowych Podów
+    metadata:
+      labels:
+        app: frontend                      # Etykieta Podów, dzięki której Service wie, do czego się łączyć
+    spec:
+      containers:                          # Lista kontenerów (można mieć kilka w jednym Podzie)
+        - name: frontend                   # Nazwa kontenera w Podzie
+          image: sebaszym77/smarthome-frontend:latest # Obraz Dockera, z którego budowany jest kontener
+          imagePullPolicy: Never 
+          ports:
+            - containerPort: 80            # Port, na którym działa aplikacja wewnątrz kontenera (np. Nginx)

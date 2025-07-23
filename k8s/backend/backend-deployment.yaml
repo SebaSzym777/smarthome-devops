@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: smarthome
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: sebaszym77/smarthome-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_USER
+              value: user
+            - name: DB_PASSWORD
+              value: password
+            - name: DB_HOST
+              value: postgresql
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: smarthome

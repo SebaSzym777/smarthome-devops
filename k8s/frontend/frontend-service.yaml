@@ -1,0 +1,12 @@
+apiVersion: v1                             # Używamy podstawowej wersji API dla Service
+kind: Service                              # Typ zasobu - Service wystawia aplikację na sieć K8s (i opcjonalnie na zewnątrz)
+metadata:
+  name: frontend-service                   # Nazwa Service'u (unikatowa w namespace)
+  namespace: smarthome                     # Namespace, w którym działa Service
+spec:
+  selector:
+    app: frontend                          # Łączy się z Podami z etykietą "app=frontend"
+  ports:
+    - port: 80                             # Port, na którym Service "nasłuchuje" (czyli wewnętrzny port usługi)
+      targetPort: 80                       # Port, na który faktycznie kierowany jest ruch (czyli do kontenera)
+  type: NodePort                           # Typ usługi – wystawia port na zewnątrz klastra (np. http://localhost:31234)

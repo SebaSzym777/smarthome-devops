@@ -1,57 +1,60 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    PROJECT_DIR = 'smarthome-app'
-    BACKEND_IMAGE = 'smarthome-backend'
-    FRONTEND_IMAGE = 'smarthome-frontend'
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
+    environment {
+        DOCKERHUB_USER = 'sebaszym77'
+        BACKEND_IMAGE = "${DOCKERHUB_USER}/smarthome-backend:latest"
+        FRONTEND_IMAGE = "${DOCKERHUB_USER}/smarthome-frontend:latest"
+        KUBECONFIG_CREDENTIALS_ID = 'KUBECONFIG'
     }
 
-    stage('Build Backend') {
-      steps {
-        dir("${PROJECT_DIR}/backend") {
-          echo '📦 Buduję backend...'
-          sh 'docker build -t ${BACKEND_IMAGE} .'
+    stages {
+        stage('Build Backend') {
+            steps {
+                dir('smarthome-app/backend') {
+                    sh "docker build -t ${BACKEND_IMAGE} ."
+                }
+            }
         }
-      }
-    }
 
-    stage('Build Frontend') {
-      steps {
-        dir("${PROJECT_DIR}/frontend") {
-          echo '🎨 Buduję frontend...'
-          sh 'docker build --no-cache -t ${FRONTEND_IMAGE} .'
+        stage('Build Frontend') {
+            steps {
+                dir('smarthome-app/frontend') {
+                    sh "docker build -t ${FRONTEND_IMAGE} ."
+                }
+            }
         }
-      }
-    }
 
-    stage('Start Stack') {
-      steps {
-        dir("${PROJECT_DIR}") {
-          echo '🚀 Uruchamiam backend + frontend + db + nginx...'
-          sh 'docker compose down --remove-orphans'
-          sh 'docker compose up -d --build'
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh """
+                        echo "$PASS" | docker login -u "$USER" --password-stdin
+                        docker push ${BACKEND_IMAGE}
+                        docker push ${FRONTEND_IMAGE}
+                    """
+                }
+            }
         }
-      }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: env.KUBECONFIG_CREDENTIALS_ID, variable: 'KUBECONFIG')]) {
+                    sh '''
+                        kubectl set image deployment/backend backend=${BACKEND_IMAGE} -n smarthome
+                        kubectl set image deployment/frontend frontend=${FRONTEND_IMAGE} -n smarthome
+                    '''
+                }
+            }
+        }
     }
 
-    stage('Success') {
-      steps {
-        echo '✅ Aplikacja Smart Home została zbudowana i uruchomiona!'
-      }
+    post {
+        success {
+            echo '✅ Deployment zakończony sukcesem!'
+        }
+        failure {
+            echo '❌ Błąd podczas wdrażania!'
+        }
     }
-  }
-
-  post {
-    failure {
-      echo '❌ Błąd w pipeline!'
-    }
-  }
 }
