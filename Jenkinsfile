@@ -8,7 +8,7 @@ pipeline {
         KUBECONFIG_CREDENTIALS_ID = 'KUBECONFIG'
     }
 
-    stages { 
+    stages {
         stage('Build Backend') {
             steps {
                 dir('smarthome-app/backend') {
